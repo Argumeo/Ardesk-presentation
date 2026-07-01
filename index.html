@@ -132,6 +132,21 @@ nav{
 .scroll-cue .bar{width:1px;height:32px;background:linear-gradient(var(--text-faint),transparent);animation:scrollpulse 1.8s ease-in-out infinite;}
 @keyframes scrollpulse{0%,100%{opacity:0.3;}50%{opacity:1;}}
 
+/* Hero Miraflores button */
+.hero-miraflores-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--orange);color:#0A0E14;
+  padding:16px 32px;border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1rem;
+  margin-top:32px;max-width:fit-content;
+  transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.hero-miraflores-btn:hover{
+  background:#FF8A55;
+  transform:translateY(-2px);
+  box-shadow:0 8px 30px rgba(255,107,53,0.4);
+}
+
 /* Section headers */
 .section-head{margin-bottom:64px;max-width:720px;}
 .section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;line-height:1.1;}
@@ -371,6 +386,7 @@ footer{padding:40px 8vw;text-align:center;color:var(--text-faint);font-size:0.8r
         <div class="hero-stat-label">Más leads calificados/día</div>
       </div>
     </div>
+    <a href="miraflores-project.html" class="hero-miraflores-btn">Ver Proyecto Miraflores →</a>
   </div>
   <div class="scroll-cue"><div class="bar"></div>Desplázate</div>
 </section>
