@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ardesk — Tu Call Center con IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0A0E14;
+  --panel:#151B26;
+  --panel-2:#1C2433;
+  --line:#252E40;
+  --cyan:#00D9FF;
+  --orange:#FF6B35;
+  --green:#00E58C;
+  --text:#E8ECF2;
+  --text-dim:#8A96AB;
+  --text-faint:#4E586B;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  overflow-x:hidden;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.02em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--cyan);
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:18px;
+}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--cyan);}
+section{
+  padding:120px 8vw;
+  position:relative;
+  border-bottom:1px solid var(--line);
+}
+.section-inner{max-width:1200px;margin:0 auto;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+::selection{background:var(--cyan);color:#000;}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 8vw;
+  background:rgba(10,14,20,0.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:8px;}
+.nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+.nav-links{display:flex;gap:32px;font-size:0.85rem;color:var(--text-dim);align-items:center;}
+.nav-links a:hover{color:var(--cyan);}
+.nav-miraflores{
+  background:var(--orange);
+  color:#0A0E14 !important;
+  padding:8px 18px;
+  border-radius:20px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  font-weight:600;
+  margin-left:16px;
+  transition:all .2s ease;
+}
+.nav-miraflores:hover{
+  background:#FF8A55;
+  color:#0A0E14 !important;
+  transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(255,107,53,0.3);
+}
+@media (max-width:900px){
+  .nav-links{display:none;}
+  .nav-miraflores{display:none;}
+}
+
+/* HERO with warp tunnel */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;
+  padding-top:80px;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+#warp-canvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  opacity:0.55;
+}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;width:100%;padding:0 8vw;}
+.hero-title{
+  font-size:clamp(2.6rem,7vw,5.6rem);
+  font-weight:700;
+  line-height:1.02;
+  margin-bottom:28px;
+}
+.hero-title .accent{color:var(--cyan);}
+.hero-tagline{
+  font-size:clamp(1.05rem,2vw,1.4rem);
+  color:var(--text-dim);
+  max-width:640px;
+  margin-bottom:44px;
+  line-height:1.5;
+}
+.hero-stats{display:flex;gap:56px;flex-wrap:wrap;}
+.hero-stat-num{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:600;color:var(--cyan);}
+.hero-stat-label{font-size:0.78rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;}
+.scroll-cue{
+  position:absolute;bottom:36px;left:8vw;z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-faint);
+  display:flex;align-items:center;gap:10px;
+}
+.scroll-cue .bar{width:1px;height:32px;background:linear-gradient(var(--text-faint),transparent);animation:scrollpulse 1.8s ease-in-out infinite;}
+@keyframes scrollpulse{0%,100%{opacity:0.3;}50%{opacity:1;}}
+
+/* Section headers */
+.section-head{margin-bottom:64px;max-width:720px;}
+.section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;line-height:1.1;}
+.section-sub{color:var(--text-dim);margin-top:16px;font-size:1.05rem;line-height:1.6;}
+
+/* PROBLEM comparison */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+@media (max-width:800px){.compare-grid{grid-template-columns:1fr;}}
+.compare-col{background:var(--panel);padding:40px;}
+.compare-col.after{background:#101D18;}
+.compare-label{font-family:'JetBrains Mono',monospace;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:24px;display:inline-block;padding:6px 14px;border-radius:20px;}
+.compare-col.before .compare-label{color:var(--orange);border:1px solid var(--orange);}
+.compare-col.after .compare-label{color:var(--green);border:1px solid var(--green);}
+.compare-item{display:flex;gap:14px;padding:16px 0;border-top:1px solid var(--line);font-size:0.95rem;color:var(--text-dim);}
+.compare-item:first-of-type{border-top:none;}
+.compare-item .icon{flex-shrink:0;width:20px;text-align:center;}
+.compare-col.before .icon{color:var(--orange);}
+.compare-col.after .icon{color:var(--green);}
+
+/* PILLARS */
+.pillars{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.pillar{
+  background:var(--panel);
+  padding:48px;
+  display:grid;
+  grid-template-columns:80px 1fr 1fr;
+  gap:40px;
+  align-items:start;
+  position:relative;
+}
+@media (max-width:900px){.pillar{grid-template-columns:60px 1fr;}.pillar .pillar-value{grid-column:1/-1;}}
+.pillar-icon{
+  width:56px;height:56px;border-radius:12px;
+  background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+  border:1px solid var(--line);
+}
+.pillar-ai .pillar-icon{border-color:var(--cyan);box-shadow:0 0 24px rgba(0,217,255,0.15);}
+.pillar-title{font-size:1.3rem;font-weight:600;margin-bottom:14px;}
+.pillar-desc{color:var(--text-dim);font-size:0.92rem;line-height:1.6;}
+.pillar-value{
+  background:var(--panel-2);
+  border-radius:10px;
+  padding:22px 24px;
+  border-left:2px solid var(--cyan);
+}
+.pillar-value-label{font-family:'JetBrains Mono',monospace;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--cyan);margin-bottom:8px;}
+.pillar-value-text{font-size:0.92rem;color:var(--text);line-height:1.55;}
+.pillar-cost{font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600;}
+
+/* DASHBOARD DEMO MOCK */
+.demo-tabs{display:flex;gap:4px;margin-bottom:0;border-bottom:1px solid var(--line);}
+.demo-tab{
+  padding:14px 22px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;
+  color:var(--text-faint);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s ease;user-select:none;
+}
+.demo-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.demo-tab:hover{color:var(--text);}
+.demo-panel{
+  background:var(--panel);
+  border:1px solid var(--line);border-top:none;
+  border-radius:0 0 14px 14px;
+  min-height:420px;
+  padding:32px;
+  display:none;
+}
+.demo-panel.active{display:block;animation:fadein .4s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* leads table mock */
+.mock-toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.mock-search{flex:1;min-width:200px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;color:var(--text-dim);font-size:0.85rem;font-family:'JetBrains Mono',monospace;}
+.mock-filter{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 16px;color:var(--text-dim);font-size:0.8rem;font-family:'JetBrains Mono',monospace;}
+.mock-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.mock-table th{text-align:left;padding:12px 14px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--line);}
+.mock-table td{padding:14px 14px;border-bottom:1px solid var(--line);color:var(--text-dim);}
+.status-pill{padding:4px 12px;border-radius:20px;font-size:0.72rem;font-family:'JetBrains Mono',monospace;}
+.status-interesado{background:rgba(0,229,140,0.12);color:var(--green);}
+.status-agendado{background:rgba(0,217,255,0.12);color:var(--cyan);}
+.status-no{background:rgba(255,107,53,0.12);color:var(--orange);}
+
+/* Control room maria */
+.control-room{
+  position:relative;
+  min-height:360px;
+  border-radius:10px;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at center, #0D1420 0%, #0A0E14 100%);
+}
+#maria-canvas{position:absolute;inset:0;width:100%;height:100%;}
+.maria-core{
+  position:relative;z-index:2;text-align:center;
+}
+.maria-status{
+  font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--green);
+  display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;
+}
+.maria-status .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.maria-name{font-size:2.4rem;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+.maria-metrics{display:flex;gap:40px;justify-content:center;margin-top:28px;}
+.maria-metric-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;color:var(--cyan);}
+.maria-metric-label{font-size:0.7rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+
+/* supervisor mock */
+.supervisor-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media (max-width:700px){.supervisor-grid{grid-template-columns:1fr;}}
+.mock-card{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:22px;}
+.mock-card-title{font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;color:var(--text-faint);margin-bottom:16px;letter-spacing:0.06em;}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:0.82rem;}
+.bar-row .name{width:90px;color:var(--text-dim);flex-shrink:0;}
+.bar-track{flex:1;height:8px;background:var(--panel);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:4px;}
+.bar-val{font-family:'JetBrains Mono',monospace;color:var(--text-dim);font-size:0.78rem;width:34px;text-align:right;}
+
+/* dialer mock */
+.dialer-grid{display:grid;grid-template-columns:180px 1fr 220px;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:340px;}
+@media (max-width:800px){.dialer-grid{grid-template-columns:1fr;}}
+.dialer-col{background:var(--panel-2);padding:22px;}
+.dialpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.dialpad-key{aspect-ratio:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;color:var(--text-dim);font-size:0.95rem;}
+.call-btn{margin-top:16px;background:var(--green);color:#04140D;text-align:center;padding:12px;border-radius:8px;font-weight:600;font-size:0.85rem;font-family:'JetBrains Mono',monospace;}
+.lead-card-mini h4{font-size:1rem;margin-bottom:6px;}
+.lead-card-mini p{font-size:0.78rem;color:var(--text-faint);margin-bottom:4px;}
+.chat-bubble{background:var(--panel);border-radius:8px;padding:10px 12px;font-size:0.78rem;color:var(--text-dim);margin-bottom:8px;}
+.chat-bubble.me{background:rgba(0,217,255,0.08);border:1px solid rgba(0,217,255,0.2);}
+
+/* COMPARISON TABLE */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line);}
+table.comp{width:100%;border-collapse:collapse;min-width:820px;font-size:0.85rem;}
+table.comp th{
+  background:var(--panel-2);
+  padding:16px 18px;text-align:left;
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);
+  border-bottom:1px solid var(--line);
+}
+table.comp th.us{color:var(--cyan);background:rgba(0,217,255,0.06);}
+table.comp td{padding:16px 18px;border-bottom:1px solid var(--line);color:var(--text-dim);vertical-align:top;}
+table.comp td.us{background:rgba(0,217,255,0.04);color:var(--text);font-weight:500;}
+table.comp tr:last-child td{border-bottom:none;}
+table.comp td:first-child{color:var(--text);font-weight:500;}
+.ok{color:var(--green);}
+.bad{color:var(--orange);}
+.dev{color:var(--text-faint);}
+
+/* USE CASE flow */
+.usecase-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:36px;align-items:stretch;}
+@media (max-width:850px){.usecase-grid{grid-template-columns:1fr;}.usecase-arrow{transform:rotate(90deg);margin:0 auto;}}
+.usecase-col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:36px;}
+.usecase-col.before{border-top:3px solid var(--orange);}
+.usecase-col.after{border-top:3px solid var(--green);}
+.usecase-head{font-family:'JetBrains Mono',monospace;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:24px;}
+.usecase-col.before .usecase-head{color:var(--orange);}
+.usecase-col.after .usecase-head{color:var(--green);}
+.usecase-line{padding:14px 0;border-top:1px solid var(--line);font-size:0.88rem;color:var(--text-dim);line-height:1.5;}
+.usecase-line:first-of-type{border-top:none;}
+.usecase-arrow{display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:1.8rem;}
+.result-banner{
+  margin-top:32px;padding:20px 28px;border-radius:10px;
+  background:linear-gradient(90deg,rgba(0,229,140,0.1),rgba(0,217,255,0.05));
+  border:1px solid rgba(0,229,140,0.25);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+}
+.result-num{font-family:'JetBrains Mono',monospace;font-size:1.8rem;color:var(--green);font-weight:700;}
+
+/* Architecture */
+.arch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.arch-item{background:var(--panel);padding:28px;}
+.arch-label{font-family:'JetBrains Mono',monospace;font-size:0.68rem;text-transform:uppercase;color:var(--cyan);letter-spacing:0.08em;margin-bottom:10px;}
+.arch-value{font-size:0.92rem;color:var(--text);line-height:1.5;}
+
+/* Business model */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+@media (max-width:900px){.pricing-grid{grid-template-columns:1fr;}}
+.price-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:36px 28px;display:flex;flex-direction:column;}
+.price-card.featured{border-color:var(--cyan);box-shadow:0 0 32px rgba(0,217,255,0.08);position:relative;}
+.price-card.featured::before{content:'MÁS RENTABLE';position:absolute;top:-11px;left:28px;background:var(--cyan);color:#000;font-family:'JetBrains Mono',monospace;font-size:0.62rem;padding:4px 10px;border-radius:20px;letter-spacing:0.06em;}
+.price-modality{font-size:1.1rem;font-weight:600;margin-bottom:16px;}
+.price-desc{font-size:0.85rem;color:var(--text-dim);line-height:1.55;margin-bottom:24px;flex:1;}
+.price-tag{font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:var(--cyan);font-weight:600;padding-top:20px;border-top:1px solid var(--line);}
+
+/* CTA */
+.cta-section{text-align:center;padding:140px 8vw;}
+.cta-title{font-size:clamp(2rem,5vw,3.4rem);margin-bottom:24px;}
+.cta-steps{display:flex;justify-content:center;gap:60px;margin:56px 0;flex-wrap:wrap;}
+.cta-step{max-width:220px;}
+.cta-step-num{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:0.8rem;margin-bottom:10px;}
+.cta-step-text{font-size:0.92rem;color:var(--text-dim);}
+.cta-btn{
+  display:inline-block;background:var(--cyan);color:#04141C;
+  padding:18px 44px;border-radius:8px;font-weight:600;font-size:1rem;
+  font-family:'Space Grotesk',sans-serif;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,217,255,0.3);}
+footer{padding:40px 8vw;text-align:center;color:var(--text-faint);font-size:0.8rem;font-family:'JetBrains Mono',monospace;}
+
+/* Chart container */
+.chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span class="dot"></span>Ardesk</div>
+  <div class="nav-links">
+    <a href="#problema">Problema</a>
+    <a href="#solucion">Solución</a>
+    <a href="#demo">Demo</a>
+    <a href="#comparativa">Comparativa</a>
+    <a href="#modelo">Precios</a>
+    <a href="miraflores-project.html" class="nav-miraflores">Proyecto Miraflores →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding-left:0;padding-right:0;">
+  <canvas id="warp-canvas"></canvas>
+  <div class="hero-content">
+    <div class="eyebrow">Call Center Inteligente</div>
+    <h1 class="hero-title">Tu Call Center<br><span class="accent">con IA.</span></h1>
+    <p class="hero-tagline">Automatiza la primera llamada, supervisa todo en tiempo real y escala sin contratar.</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">2000+</div>
+        <div class="hero-stat-label">Llamadas/día con María</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">$0.09</div>
+        <div class="hero-stat-label">Costo por minuto (IA + voz)</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">5–10x</div>
+        <div class="hero-stat-label">Más leads calificados/día</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><div class="bar"></div>Desplázate</div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problema">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">El problema</div>
+      <h2 class="section-title">Un call center de personas no puede ver todo, ni llamar suficiente.</h2>
+      <p class="section-sub">Leads fríos sin seguimiento, un supervisor a ciegas con Excel, y un costo por llamada que no baja. Así es el día a día antes de automatizar.</p>
+    </div>
+    <div class="compare-grid reveal">
+      <div class="compare-col before">
+        <span class="compare-label">Antes · Manual</span>
+        <div class="compare-item"><span class="icon">✕</span>Agentes marcan en frío, sin priorización de leads calientes</div>
+        <div class="compare-item"><span class="icon">✕</span>Supervisor gestiona con Excel y "a ojo"</div>
+        <div class="compare-item"><span class="icon">✕</span>WhatsApp manual e inconsistente entre agentes</div>
+        <div class="compare-item"><span class="icon">✕</span>Costo móvil España vía Twilio: ~$0.048/min</div>
+        <div class="compare-item"><span class="icon">✕</span>Conversión estancada: 2-3% de los leads</div>
+      </div>
+      <div class="compare-col after">
+        <span class="compare-label">Después · Ardesk</span>
+        <div class="compare-item"><span class="icon">✓</span>María IA hace la primera pasada 24/7 y filtra interesados</div>
+        <div class="compare-item"><span class="icon">✓</span>Dashboard en tiempo real, con alertas y campanita</div>
+        <div class="compare-item"><span class="icon">✓</span>Secuencias de WhatsApp automáticas y consistentes</div>
+        <div class="compare-item"><span class="icon">✓</span>Costo con ITX: $0.018/min — 62% de ahorro</div>
+        <div class="compare-item"><span class="icon">✓</span>Conversión estimada: 5-8% de los leads</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION / PILLARS -->
+<section id="solucion">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">La solución</div>
+      <h2 class="section-title">Cuatro sistemas que trabajan juntos</h2>
+      <p class="section-sub">Un agente de IA que llama, un dashboard que lo muestra todo, WhatsApp que recupera lo que se pierde, y un marcador para tu equipo humano.</p>
+    </div>
+
+    <div class="pillars">
+      <div class="pillar pillar-ai reveal">
+        <div class="pillar-icon">🤖</div>
+        <div>
+          <div class="pillar-title">María — Agente de IA</div>
+          <div class="pillar-desc">Llamadas automáticas 24/7 con guion honesto y natural. Detecta si el lead está interesado, agendado o no interesado, y genera transcripción, resumen en español y audio de cada llamada.</div>
+        </div>
+        <div class="pillar-value">
+          <div class="pillar-value-label">Valor para el cliente</div>
+          <div class="pillar-value-text">Equivale a 3-4 agentes humanos en la primera pasada.<br><span class="pillar-cost">~$0.09/min</span> vs $0.15–0.30/min de la competencia.</div>
+        </div>
+      </div>
+
+      <div class="pillar reveal">
+        <div class="pillar-icon">📊</div>
+        <div>
+          <div class="pillar-title">Dashboard Supervisor</div>
+          <div class="pillar-desc">Métricas en tiempo real, feed de interesados que se actualiza cada 15 segundos, alertas por campanita y email, distribución y reciclado de base de leads, y matriz de asignación agentes × campañas.</div>
+        </div>
+        <div class="pillar-value">
+          <div class="pillar-value-label">Valor para el cliente</div>
+          <div class="pillar-value-text">El supervisor ve todo sin tener que preguntar.<br>1 persona gestiona todos los agentes + María.</div>
+        </div>
+      </div>
+
+      <div class="pillar reveal">
+        <div class="pillar-icon">📱</div>
+        <div>
+          <div class="pillar-title">WhatsApp Automático</div>
+          <div class="pillar-desc">Flujo de venta y postventa pensado para energía, pero adaptable a cualquier rubro. Secuencias, recordatorios, respuestas a preguntas frecuentes y cierre de la conversación.</div>
+        </div>
+        <div class="pillar-value">
+          <div class="pillar-value-label">Valor para el cliente</div>
+          <div class="pillar-value-text">Recupera leads que no contestan la llamada.<br>El canal preferido en España y Latinoamérica.</div>
+        </div>
+      </div>
+
+      <div class="pillar reveal">
+        <div class="pillar-icon">☎️</div>
+        <div>
+          <div class="pillar-title">Marcador Manual WebRTC</div>
+          <div class="pillar-desc">Softphone directo desde el navegador (Chrome/Safari), con caller ID +34 de España. ITX como proveedor primario con Twilio como respaldo, y clasificación del lead al colgar.</div>
+        </div>
+        <div class="pillar-value">
+          <div class="pillar-value-label">Valor para el cliente</div>
+          <div class="pillar-value-text">Agentes humanos llaman barato con número español.<br>Audio bidireccional verificado en producción.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">Demo visual</div>
+      <h2 class="section-title">Así se ve el dashboard por dentro</h2>
+      <p class="section-sub">Navega entre las vistas reales del producto: leads, la sala de control de María, la vista del supervisor y el marcador manual.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="demo-tabs">
+        <div class="demo-tab active" data-tab="leads">Leads</div>
+        <div class="demo-tab" data-tab="maria">María — Control Room</div>
+        <div class="demo-tab" data-tab="supervisor">Supervisor</div>
+        <div class="demo-tab" data-tab="dialer">Marcador</div>
+      </div>
+
+      <!-- LEADS PANEL -->
+      <div class="demo-panel active" id="panel-leads">
+        <div class="mock-toolbar">
+          <div class="mock-search">🔍 Buscar por nombre, teléfono o campaña...</div>
+          <div class="mock-filter">Estado ▾</div>
+          <div class="mock-filter">Campaña ▾</div>
+          <div class="mock-filter">Últimos 7 días ▾</div>
+        </div>
+        <table class="mock-table">
+          <thead><tr><th>Lead</th><th>Teléfono</th><th>Campaña</th><th>Estado</th><th>Última llamada</th></tr></thead>
+          <tbody>
+            <tr><td>Marta Fernández</td><td class="mono">+34 611 223 344</td><td>Energía Q3</td><td><span class="status-pill status-interesado">Interesado</span></td><td class="mono">Hoy, 10:42</td></tr>
+            <tr><td>Javier Ruiz</td><td class="mono">+34 622 334 455</td><td>Energía Q3</td><td><span class="status-pill status-agendado">Agendado</span></td><td class="mono">Hoy, 09:15</td></tr>
+            <tr><td>Lucía Gómez</td><td class="mono">+34 633 445 566</td><td>Reciclado</td><td><span class="status-pill status-no">No interesado</span></td><td class="mono">Ayer, 17:03</td></tr>
+            <tr><td>Antonio Vidal</td><td class="mono">+34 644 556 677</td><td>Energía Q3</td><td><span class="status-pill status-interesado">Interesado</span></td><td class="mono">Ayer, 14:22</td></tr>
+            <tr><td>Carmen Soto</td><td class="mono">+34 655 667 788</td><td>WhatsApp</td><td><span class="status-pill status-agendado">Agendado</span></td><td class="mono">Ayer, 11:08</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MARIA PANEL -->
+      <div class="demo-panel" id="panel-maria">
+        <div class="control-room">
+          <canvas id="maria-canvas"></canvas>
+          <div class="maria-core">
+            <div class="maria-status"><span class="pulse-dot"></span>ACTIVA · LLAMANDO</div>
+            <div class="maria-name">María</div>
+            <div class="maria-metrics">
+              <div><div class="maria-metric-num">148</div><div class="maria-metric-label">Llamadas hoy</div></div>
+              <div><div class="maria-metric-num">22</div><div class="maria-metric-label">Interesados</div></div>
+              <div><div class="maria-metric-num">4:12</div><div class="maria-metric-label">Duración media</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPERVISOR PANEL -->
+      <div class="demo-panel" id="panel-supervisor">
+        <div class="supervisor-grid">
+          <div class="mock-card">
+            <div class="mock-card-title">Distribución de leads</div>
+            <div class="bar-row"><span class="name">Agente 01</span><div class="bar-track"><div class="bar-fill" style="width:82%"></div></div><span class="bar-val">82%</span></div>
+            <div class="bar-row"><span class="name">Agente 02</span><div class="bar-track"><div class="bar-fill" style="width:65%"></div></div><span class="bar-val">65%</span></div>
+            <div class="bar-row"><span class="name">Agente 03</span><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><span class="bar-val">91%</span></div>
+            <div class="bar-row"><span class="name">Agente 04</span><div class="bar-track"><div class="bar-fill" style="width:47%"></div></div><span class="bar-val">47%</span></div>
+            <div class="bar-row"><span class="name">María</span><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><span class="bar-val">100%</span></div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-card-title">Chat en tiempo real</div>
+            <div class="chat-bubble">Supervisor: revisa el lead de Antonio Vidal, parece muy interesado</div>
+            <div class="chat-bubble me">Agente 03: listo, lo llamo ahora</div>
+            <div class="chat-bubble">María: lead #4471 marcado como agendado</div>
+            <div class="chat-bubble me">Agente 01: reciclando base de la campaña anterior</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIALER PANEL -->
+      <div class="demo-panel" id="panel-dialer">
+        <div class="dialer-grid">
+          <div class="dialer-col">
+            <div class="dialpad">
+              <div class="dialpad-key">1</div><div class="dialpad-key">2</div><div class="dialpad-key">3</div>
+              <div class="dialpad-key">4</div><div class="dialpad-key">5</div><div class="dialpad-key">6</div>
+              <div class="dialpad-key">7</div><div class="dialpad-key">8</div><div class="dialpad-key">9</div>
+              <div class="dialpad-key">*</div><div class="dialpad-key">0</div><div class="dialpad-key">#</div>
+            </div>
+            <div class="call-btn">📞 +34 611 223 344</div>
+          </div>
+          <div class="dialer-col lead-card-mini">
+            <div class="mock-card-title">Ficha del lead</div>
+            <h4>Marta Fernández</h4>
+            <p>Campaña: Energía Q3</p>
+            <p>Última llamada: María, hace 2 días — interesada</p>
+            <p style="margin-top:16px;color:var(--text-dim);font-size:0.85rem;">Resumen: preguntó por tarifa plana, pidió que la llamen por la tarde.</p>
+          </div>
+          <div class="dialer-col">
+            <div class="mock-card-title">Clasificar al colgar</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+              <div class="status-pill status-interesado" style="text-align:center;padding:10px;">Interesado</div>
+              <div class="status-pill status-agendado" style="text-align:center;padding:10px;">Agendado</div>
+              <div class="status-pill status-no" style="text-align:center;padding:10px;">No interesado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARATIVE TABLE -->
+<section id="comparativa">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">Comparativa</div>
+      <h2 class="section-title">Frente a otros lanzadores</h2>
+      <p class="section-sub">Five9, Talkdesk, Aircall o construir con n8n desde cero — así se compara Ardesk con las alternativas del mercado.</p>
+    </div>
+    <div class="table-wrap reveal">
+      <table class="comp">
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th class="us">Ardesk</th>
+            <th>Five9 / Talkdesk</th>
+            <th>Aircall / CloudTalk</th>
+            <th>n8n solo (DIY)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Agente IA nativo (María)</td>
+            <td class="us"><span class="ok">✓</span> Incluido, entrenado</td>
+            <td><span class="bad">✕</span> Add-on caro</td>
+            <td><span class="bad">✕</span> No disponible</td>
+            <td><span class="dev">🔧</span> Tú lo construyes</td>
+          </tr>
+          <tr>
+            <td>Dashboard supervisor</td>
+            <td class="us"><span class="ok">✓</span> Multi-tenant, tiempo real</td>
+            <td><span class="ok">✓</span> Caro ($150+/agente)</td>
+            <td><span class="ok">✓</span> Básico</td>
+            <td><span class="bad">✕</span> No</td>
+          </tr>
+          <tr>
+            <td>WhatsApp automatizado</td>
+            <td class="us"><span class="ok">✓</span> Integrado nativo</td>
+            <td><span class="bad">✕</span> Extra</td>
+            <td><span class="bad">✕</span> Extra</td>
+            <td><span class="dev">🔧</span> Tú lo construyes</td>
+          </tr>
+          <tr>
+            <td>Marcador WebRTC propio</td>
+            <td class="us"><span class="ok">✓</span> ITX $0.018/min</td>
+            <td><span class="bad">✕</span> Twilio caro</td>
+            <td><span class="ok">✓</span> Twilio</td>
+            <td><span class="bad">✕</span> No</td>
+          </tr>
+          <tr>
+            <td>Costo por minuto (IA + voz)</td>
+            <td class="us">~$0.09</td>
+            <td>$0.25–0.50</td>
+            <td>$0.15–0.30</td>
+            <td>$0.12 (Vapi) + dev</td>
+          </tr>
+      
+          <tr>
+            <td>Setup para 10 agentes</td>
+            <td class="us">Hoy mismo</td>
+            <td>Semanas + $5k+ setup</td>
+            <td>Días + $3k+</td>
+            <td>Semanas de desarrollo</td>
+          </tr>
+          <tr>
+            <td>Propiedad del código/datos</td>
+            <td class="us">100% tuya</td>
+            <td>Del proveedor</td>
+            <td>Del proveedor</td>
+            <td>Tuya</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASE -->
+<section>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">Caso de uso real</div>
+      <h2 class="section-title">Call center de 10 agentes</h2>
+      <p class="section-sub">El escenario exacto de tu cliente: antes y después de instalar Ardesk.</p>
+    </div>
+    <div class="usecase-grid reveal">
+      <div class="usecase-col before">
+        <div class="usecase-head">Antes · Manual</div>
+        <div class="usecase-line">10 agentes marcando en frío → ~50 llamadas/día por agente = 500 llamadas/día en total</div>
+        <div class="usecase-line">1 supervisor "a ciegas", gestionando con Excel</div>
+        <div class="usecase-line">WhatsApp manual e inconsistente entre agentes</div>
+        <div class="usecase-line">Costo Twilio móvil España: ~$0.048/min</div>
+        <div class="usecase-line">Conversión: 2-3% → 10-15 leads calificados por día</div>
+      </div>
+      <div class="usecase-arrow">→</div>
+      <div class="usecase-col after">
+        <div class="usecase-head">Después · Ardesk</div>
+        <div class="usecase-line">María hace la primera pasada 24/7 → más de 2,000 llamadas/día</div>
+        <div class="usecase-line">Solo los leads "interesado/agendado" pasan a los 10 agentes humanos, que se enfocan en cerrar</div>
+        <div class="usecase-line">Supervisor ve todo en el dashboard, con alertas por campanita y chat</div>
+        <div class="usecase-line">WhatsApp automatizado recupera a quienes no contestan la llamada</div>
+        <div class="usecase-line">Costo ITX $0.018/min (62% de ahorro) + IA a $0.073/min vs $0.124 de Vapi (41% de ahorro)</div>
+      </div>
+    </div>
+    <div class="result-banner reveal">
+      <div>Conversión estimada con Ardesk</div>
+      <div class="result-num">5–8% → 50–100 leads/día</div>
+      <div style="color:var(--text-dim);font-size:0.9rem;">Equivale a un aumento de 5 a 10 veces</div>
+    </div>
+
+    <div class="chart-wrap reveal" style="margin-top:32px;">
+      <canvas id="usecaseChart" height="90"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">Arquitectura técnica</div>
+      <h2 class="section-title">Construido sobre infraestructura propia</h2>
+      <p class="section-sub">Sin dependencia de un solo proveedor. Cada componente elegido por costo, rendimiento y control.</p>
+    </div>
+    <div class="arch-grid reveal">
+      <div class="arch-item"><div class="arch-label">Frontend</div><div class="arch-value">Next.js 14 + TypeScript + Tailwind + shadcn/ui, desplegado en Vercel</div></div>
+      <div class="arch-item"><div class="arch-label">Backend / DB</div><div class="arch-value">Supabase — PostgreSQL con RLS multi-tenant real</div></div>
+      <div class="arch-item"><div class="arch-label">Automatización</div><div class="arch-value">n8n self-hosted en EasyPanel/Hostinger, sin límites</div></div>
+      <div class="arch-item"><div class="arch-label">IA de voz</div><div class="arch-value">Retell AI — gpt-5-nano + Cartesia Elena, español nativo</div></div>
+      <div class="arch-item"><div class="arch-label">Telefonía</div><div class="arch-value">ITX ($0.018/min España) + Twilio como respaldo, infraestructura propia</div></div>
+      <div class="arch-item"><div class="arch-label">WhatsApp</div><div class="arch-value">API oficial de Meta / Twilio / Waha — adaptable a cada cliente</div></div>
+      <div class="arch-item"><div class="arch-label">Deploy</div><div class="arch-value">Vercel (frontend) + Hostinger KVM1 desde $20/mes (backend)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS MODEL -->
+<section id="modelo">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="eyebrow">Modelo de negocio</div>
+      <h2 class="section-title">Tres formas de vender Ardesk</h2>
+      <p class="section-sub">Elige la modalidad que mejor se ajuste a cada cliente.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-modality">Setup + Licencia mensual</div>
+        <div class="price-desc">Instancia dedicada, dashboard propio, María configurada, WhatsApp integrado y capacitación al equipo.</div>
+        <div class="price-tag">$2,000–3,000 setup<br>+ $500–800/mes</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-modality">SaaS multi-tenant</div>
+        <div class="price-desc">El cliente opera desde una subcuenta en tu propio Ardesk. Tú mantienes la infraestructura, cobras por agente.</div>
+        <div class="price-tag">$150–250<br>por agente/mes</div>
+      </div>
+      <div class="price-card">
+        <div class="price-modality">Llave en mano</div>
+        <div class="price-desc">Entrega del repositorio completo, documentación y ayuda en la migración. El cliente se queda con todo.</div>
+        <div class="price-tag">$15,000–25,000<br>pago único</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" style="border-bottom:none;">
+  <div class="reveal">
+    <div class="eyebrow" style="justify-content:center;">Próximos pasos</div>
+    <h2 class="cta-title">Empecemos con un piloto.</h2>
+    <div class="cta-steps">
+      <div class="cta-step"><div class="cta-step-num">01</div><div class="cta-step-text">Demo en vivo con el link de Vercel</div></div>
+      <div class="cta-step"><div class="cta-step-num">02</div><div class="cta-step-text">Piloto de 2 semanas gratis con 100 leads reales</div></div>
+      <div class="cta-step"><div class="cta-step-num">03</div><div class="cta-step-text">Firma y onboarding en 48 horas</div></div>
+    </div>
+    <a href="#" class="cta-btn">Agendar demo en vivo</a>
+  </div>
+</section>
+
+<footer>Ardesk · Tu Call Center con IA</footer>
+
+<script>
+// ---------- Scroll reveal ----------
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{threshold:0.12});
+revealEls.forEach(el=>io.observe(el));
+
+// ---------- Demo tabs ----------
+const tabs = document.querySelectorAll('.demo-tab');
+const panels = document.querySelectorAll('.demo-panel');
+tabs.forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    tabs.forEach(t=>t.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- Hero warp tunnel ----------
+(function(){
+  const canvas = document.getElementById('warp-canvas');
+  const ctx = canvas.getContext('2d');
+  let w,h,particles=[];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function makeParticle(){
+    return {
+      angle: Math.random()*Math.PI*2,
+      radius: Math.random()*Math.max(w,h)*0.6 + 40,
+      speed: Math.random()*1.2+0.4,
+      len: Math.random()*50+20
+    };
+  }
+  for(let i=0;i<140;i++) particles.push(makeParticle());
+
+  function draw(){
+    ctx.fillStyle='rgba(10,14,20,0.28)';
+    ctx.fillRect(0,0,w,h);
+    const cx=w*0.68, cy=h*0.5;
+    particles.forEach(p=>{
+      const x1 = cx + Math.cos(p.angle)*p.radius;
+      const y1 = cy + Math.sin(p.angle)*p.radius*0.6;
+      const x2 = cx + Math.cos(p.angle)*(p.radius-p.len);
+      const y2 = cy + Math.sin(p.angle)*(p.radius-p.len)*0.6;
+      const alpha = Math.min(1, (Math.max(w,h)-p.radius)/Math.max(w,h)*1.4);
+      ctx.strokeStyle = `rgba(0,217,255,${0.12+alpha*0.35})`;
+      ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(x1,y1);
+      ctx.lineTo(x2,y2);
+      ctx.stroke();
+      p.radius -= p.speed*3;
+      if(p.radius < 20){ Object.assign(p, makeParticle()); p.radius = Math.max(w,h)*0.7; }
+    });
+    if(!reduced) requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ---------- Maria control room canvas ----------
+(function(){
+  const canvas = document.getElementById('maria-canvas');
+  const ctx = canvas.getContext('2d');
+  let w,h,rings=[];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize(){
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener('resize', resize);
+
+  function makeRing(){ return {r:0, speed: 0.6+Math.random()*0.5}; }
+  for(let i=0;i<6;i++){ const r=makeRing(); r.r = i*40; rings.push(r); }
+
+  let frame=0;
+  function draw(){
+    if(!canvas.offsetParent){ requestAnimationFrame(draw); return; }
+    resize();
+    ctx.clearRect(0,0,w,h);
+    const cx=w/2, cy=h/2;
+    rings.forEach(r=>{
+      ctx.strokeStyle = `rgba(0,217,255,${Math.max(0,0.5-r.r/300)})`;
+      ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.arc(cx,cy,r.r,0,Math.PI*2);
+      ctx.stroke();
+      r.r += r.speed*(1+frame%2*0.1);
+      if(r.r>260){ r.r=0; }
+    });
+    frame++;
+    if(!reduced) requestAnimationFrame(draw);
+    else setTimeout(draw, 200);
+  }
+  draw();
+})();
+
+// ---------- Use case chart ----------
+const ctxChart = document.getElementById('usecaseChart');
+new Chart(ctxChart, {
+  type:'bar',
+  data:{
+    labels:['Llamadas/día','Leads calificados/día','Costo por minuto ($)'],
+    datasets:[
+      {
+        label:'Antes (Manual)',
+        data:[450,12,0.048],
+        backgroundColor:'rgba(255,107,53,0.55)',
+        borderRadius:4,
+      },
+      {
+        label:'Después (Ardesk)',
+        data:[2000,75,0.018],
+        backgroundColor:'rgba(0,229,140,0.65)',
+        borderRadius:4,
+      }
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{
+      legend:{labels:{color:'#8A96AB',font:{family:'Inter'}}},
+      tooltip:{titleFont:{family:'Inter'},bodyFont:{family:'Inter'}}
+    },
+    scales:{
+      x:{ticks:{color:'#8A96AB'},grid:{color:'#252E40'}},
+      y:{type:'logarithmic',ticks:{color:'#8A96AB'},grid:{color:'#252E40'}}
+    }
+  }
+});
+</script>
+
+</body>
+</html>
